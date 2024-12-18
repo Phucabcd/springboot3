@@ -1,4 +1,4 @@
-package ntp.springboot3.dto.request;
+package ntp.springboot3.dto.request.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -6,11 +6,13 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDate;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserUpdateRequest {
+public class UserResponse {
+     String id;
+     String username;
      String password;
      String firstName;
      String lastName;

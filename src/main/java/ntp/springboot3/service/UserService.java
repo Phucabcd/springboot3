@@ -11,6 +11,8 @@ import ntp.springboot3.exception.AppException;
 import ntp.springboot3.exception.ErrorCode;
 import ntp.springboot3.mapper.UserMapper;
 import ntp.springboot3.repo.UserRepo;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +38,10 @@ public class UserService {
 //                .build();
 
           User user = userMapper.toUser(request);
+
+        // so cuoi cung cang cao se cang bao mat nhung dong nghia voi viec chay cang cham
+          PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+          user.setPassword(passwordEncoder.encode(user.getPassword()));
 
 //        user.setUsername(request.getUsername());
 //        user.setPassword(request.getPassword());

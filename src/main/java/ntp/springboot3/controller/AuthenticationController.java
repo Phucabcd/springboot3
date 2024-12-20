@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import ntp.springboot3.dto.request.ApiResponse;
 import ntp.springboot3.dto.request.AuthenticationRequest;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
-import ntp.springboot3.entity.User;
 import ntp.springboot3.service.AuthenticationService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,11 +21,9 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
-        boolean result = authenticationService.authenticate(request);
+        var result = authenticationService.authenticate(request);
         return ApiResponse.<AuthenticationResponse>builder()
-                .result(AuthenticationResponse.builder()
-                        .authenticated(result)
-                        .build())
+                .result(result)
                 .build();
     }
 }

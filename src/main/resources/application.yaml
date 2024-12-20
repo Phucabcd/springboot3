@@ -18,3 +18,5 @@ spring:
         naming.physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
         dialect: org.hibernate.dialect.SQLServerDialect
 
+jwt:
+  signerKey: "CZCWlbYADx8NG6raxoJFnpCUl6+2F3wam6b8o9Hcr9BwhieBMX/aUjEgsjTVoL9w"

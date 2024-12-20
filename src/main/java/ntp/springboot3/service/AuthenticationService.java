@@ -2,21 +2,27 @@ package ntp.springboot3.service;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import ntp.springboot3.dto.request.AuthenticationRequest;
+import ntp.springboot3.dto.request.IntrospectRequest;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
+import ntp.springboot3.dto.request.response.IntrospectResponse;
 import ntp.springboot3.exception.AppException;
 import ntp.springboot3.exception.ErrorCode;
 import ntp.springboot3.repo.UserRepo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -29,7 +35,25 @@ public class AuthenticationService {
     UserRepo userRepo;
 
     @NonFinal //chan khong cho import vao constuctor
-    protected static final String SIGNER_KEY = "CZCWlbYADx8NG6raxoJFnpCUl6+2F3wam6b8o9Hcr9BwhieBMX/aUjEgsjTVoL9w";
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY; //chu ky rat quan trong
+
+    public IntrospectResponse introspect(IntrospectRequest request)
+            throws JOSEException, ParseException {
+        var token = request.getToken();
+
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        return IntrospectResponse.builder()
+                .valid(verified && expityTime.after(new Date()) )
+                .build();
+    }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepo.findByUsername(request.getUsername())

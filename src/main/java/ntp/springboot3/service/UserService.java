@@ -7,6 +7,7 @@ import ntp.springboot3.dto.request.UserCreationRequest;
 import ntp.springboot3.dto.request.UserUpdateRequest;
 import ntp.springboot3.dto.request.response.UserResponse;
 import ntp.springboot3.entity.User;
+import ntp.springboot3.enums.Role;
 import ntp.springboot3.exception.AppException;
 import ntp.springboot3.exception.ErrorCode;
 import ntp.springboot3.mapper.UserMapper;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -24,6 +26,7 @@ import java.util.List;
 public class UserService {
     UserRepo userRepo;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     public User createUser(UserCreationRequest request){
 //        User user = new User();
@@ -40,8 +43,13 @@ public class UserService {
           User user = userMapper.toUser(request);
 
         // so cuoi cung cang cao se cang bao mat nhung dong nghia voi viec chay cang cham
-          PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        // PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10); // comment vi da su dung @Bean ben Securiry
           user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+          //tao role
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        user.setRoles(roles);
 
 //        user.setUsername(request.getUsername());
 //        user.setPassword(request.getPassword());

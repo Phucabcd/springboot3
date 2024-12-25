@@ -14,6 +14,7 @@ import ntp.springboot3.dto.request.AuthenticationRequest;
 import ntp.springboot3.dto.request.IntrospectRequest;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
 import ntp.springboot3.dto.request.response.IntrospectResponse;
+import ntp.springboot3.entity.User;
 import ntp.springboot3.exception.AppException;
 import ntp.springboot3.exception.ErrorCode;
 import ntp.springboot3.repo.UserRepo;
@@ -21,11 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -64,7 +67,8 @@ public class AuthenticationService {
         if(!authenticated)
             throw new AppException(ErrorCode.AUTHENTICATION);
 
-        var token = generateToken(request.getUsername());
+//        var token = generateToken(request.getUsername());
+        var token = generateToken(user);
 
         return AuthenticationResponse.builder()
                 .token(token)
@@ -72,17 +76,17 @@ public class AuthenticationService {
                 .build();
     }
 
-    String generateToken(String username) {
+    String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimSet = new JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("devteria.com")//dinh danh
                 .issueTime(new Date())// lay thoi gian hien tai
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()//het han sau 1 gio
                 ))// xac dinh thoi han
-                .claim("customClaim", "custom")
+                .claim("scope", buildScope(user))
                 .build();
         //sau khi cau hinh xong thi payload
         Payload payLoad = new Payload(jwtClaimSet.toJSONObject());
@@ -98,4 +102,12 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+    String buildScope(User user) {
+        StringJoiner stringJoiner = new StringJoiner("");
+        if (!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(stringJoiner::add);
+
+            return stringJoiner.toString();
+    }
 }
+

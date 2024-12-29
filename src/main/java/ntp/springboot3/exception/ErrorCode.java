@@ -9,6 +9,7 @@ public enum ErrorCode {
     INVALID_KEy(1005, "invalid message key"),
     AUTHENTICATION_FAILED(1006, "Authentication failed"),
     AUTHENTICATION(1007, "Authentication failed password"),
+    GETUSERERROR(1008, "Get user error"),
     ;
 
 

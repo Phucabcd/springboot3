@@ -56,7 +56,7 @@ public class UserService {
           //tao role
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
-        user.setRoles(roles);
+//        user.setRoles(roles);
 
 //        user.setUsername(request.getUsername());
 //        user.setPassword(request.getPassword());

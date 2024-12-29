@@ -15,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "[User]")
+@Table(name = "[user]")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -27,5 +27,6 @@ public class User {
      LocalDate dob;
 
      //set khac list chi co 1 item da ton tai
-     Set<String> roles;
+     @ManyToMany
+     Set<Role> roles;
 }

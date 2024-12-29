@@ -2,6 +2,7 @@ package ntp.springboot3.dto.request.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ntp.springboot3.entity.Role;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -18,5 +19,5 @@ public class UserResponse {
      String lastName;
      LocalDate dob;
 
-     Set<String> roles;
+     Set<Role> roles;
 }

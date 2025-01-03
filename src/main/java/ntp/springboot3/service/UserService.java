@@ -7,12 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ntp.springboot3.dto.request.UserCreationRequest;
 import ntp.springboot3.dto.request.UserUpdateRequest;
+import ntp.springboot3.dto.request.response.RoleResponse;
 import ntp.springboot3.dto.request.response.UserResponse;
 import ntp.springboot3.entity.User;
 import ntp.springboot3.enums.Role;
 import ntp.springboot3.exception.AppException;
 import ntp.springboot3.exception.ErrorCode;
 import ntp.springboot3.mapper.UserMapper;
+import ntp.springboot3.repo.RoleRepo;
 import ntp.springboot3.repo.UserRepo;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +36,7 @@ public class UserService {
     UserRepo userRepo;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    RoleRepo roleRepo;
 
     public User createUser(UserCreationRequest request){
 //        User user = new User();
@@ -68,9 +71,10 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getUser(){
+//    @PreAuthorize("hasAnyAuthority('...')")
+    public List<UserResponse> getUsers() {
         log.info("In method get Users");
-        return userRepo.findAll();
+        return userRepo.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     //user chi lay duoc thong tin cua chinh minh
@@ -91,8 +95,7 @@ public class UserService {
     }
     
     public UserResponse updateUser(String userId, UserUpdateRequest request){
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
 
         userMapper.updateUser(user, request);
 
@@ -100,6 +103,11 @@ public class UserService {
 //        user.setFirstName(request.getFirstName());
 //        user.setLastName(request.getLastName());
 //        user.setDob(request.getDob());
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepo.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepo.save(user));
     }

@@ -25,7 +25,7 @@ public class User {
      String firstName;
      String lastName;
      LocalDate dob;
-
+     
      //set khac list chi co 1 item da ton tai
      @ManyToMany
      Set<Role> roles;

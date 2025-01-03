@@ -35,15 +35,12 @@ public class RoleService {
 
         role = roleRepo.save(role);
 
-        return roleMapper.ToRoleResponse(role);
+        return roleMapper.toRoleResponse(role);
    }
 
-   public List<RoleResponse> getAll(){
-       return roleRepo.findAll()
-               .stream()
-               .map(roleMapper::ToRoleResponse)
-               .toList();
-   }
+    public List<RoleResponse> getAll() {
+        return roleRepo.findAll().stream().map(roleMapper::toRoleResponse).toList();
+    }
 
    public void delete(String role){
        roleRepo.deleteById(role);

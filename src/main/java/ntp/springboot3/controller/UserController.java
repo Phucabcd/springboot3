@@ -32,13 +32,15 @@ public class UserController {
     }
 
     @GetMapping
-    List<User> getAllUsers() {
+    ApiResponse<List<UserResponse>> getUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        log.info("Username: " + authentication.getName());
-        authentication.getAuthorities().forEach(g -> log.info(g.getAuthority()));
+        log.info("Username: ", authentication.getName());
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-        return userService.getUser();
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getUsers())
+                .build();
     }
 
     @GetMapping("/{userId}")
@@ -56,8 +58,10 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    UserResponse updateUser(@RequestBody UserUpdateRequest request, @PathVariable String userId) {
-        return userService.updateUser(userId, request);
+    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(userId, request))
+                .build();
     }
 
     @DeleteMapping("/{userId}")

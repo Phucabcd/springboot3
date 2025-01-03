@@ -1,20 +1,14 @@
-package ntp.springboot3.entity;
+package ntp.springboot3.dto.request.response;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity
-public class Premission {
-    @Id
+public class PermissionResponse {
     String name;
     String description;
-
 }

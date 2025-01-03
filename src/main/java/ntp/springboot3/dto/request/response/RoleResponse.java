@@ -1,26 +1,22 @@
-package ntp.springboot3.entity;
+package ntp.springboot3.dto.request.response;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ntp.springboot3.entity.Permission;
+import ntp.springboot3.entity.Role;
 
 import java.util.Set;
 
-@Getter
-@Setter
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity
-public class Role {
-    @Id
+public class RoleResponse {
     String name;
     String description;
 
     @ManyToMany
-    Set<Permission> premissions;
-
+    Set<PermissionResponse> permissions;
 }

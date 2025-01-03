@@ -29,9 +29,9 @@ public class PermissionController {
     }
 
     @GetMapping
-    ApiResponse<List<PermissionResponse>> findAll() {
+    ApiResponse<List<PermissionResponse>> getAll() {
         return ApiResponse.<List<PermissionResponse>>builder()
-                .result(permissionService.findAll())
+                .result(permissionService.getAll())
                 .build();
     }
 

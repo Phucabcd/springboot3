@@ -31,7 +31,7 @@ public class RoleService {
         var role = roleMapper.toRole(request);
 
         var permissions = permissionRepo.findAllById(request.getPermissions());
-        role.setPremissions(new HashSet<>(permissions));
+        role.setPermissions(new HashSet<>(permissions));
 
         role = roleRepo.save(role);
 

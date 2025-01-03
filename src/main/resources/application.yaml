@@ -5,7 +5,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=identiry_service;encrypt=true;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost:1433;databaseName=identity_service;encrypt=true;trustServerCertificate=true
     username: sa
     password: phuc819615
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

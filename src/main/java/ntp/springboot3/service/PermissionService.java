@@ -29,7 +29,7 @@ public class PermissionService {
         return permissionMapper.toPermissionResponse(permission);
     }
 
-    public List<PermissionResponse> findAll(){
+    public List<PermissionResponse> getAll() {
         var permissions = permissionRepo.findAll();
         return permissions.stream().map(permissionMapper::toPermissionResponse).toList();
     }

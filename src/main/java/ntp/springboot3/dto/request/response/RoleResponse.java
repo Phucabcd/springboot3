@@ -17,6 +17,5 @@ public class RoleResponse {
     String name;
     String description;
 
-    @ManyToMany
     Set<PermissionResponse> permissions;
 }

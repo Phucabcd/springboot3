@@ -12,11 +12,14 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import ntp.springboot3.dto.request.AuthenticationRequest;
 import ntp.springboot3.dto.request.IntrospectRequest;
+import ntp.springboot3.dto.request.LogoutRequest;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
 import ntp.springboot3.dto.request.response.IntrospectResponse;
+import ntp.springboot3.entity.InvalidatedToken;
 import ntp.springboot3.entity.User;
 import ntp.springboot3.exception.AppException;
 import ntp.springboot3.exception.ErrorCode;
+import ntp.springboot3.repo.InvalidatedTokenRepo;
 import ntp.springboot3.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,6 +32,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -36,6 +40,7 @@ import java.util.StringJoiner;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepo userRepo;
+    InvalidatedTokenRepo invalidatedTokenRepo;
 
     @NonFinal //chan khong cho import vao constuctor
     @Value("${jwt.signerKey}")
@@ -44,17 +49,15 @@ public class AuthenticationService {
     public IntrospectResponse introspect(IntrospectRequest request)
             throws JOSEException, ParseException {
         var token = request.getToken();
+        boolean isValid = true;
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-
+        try {
+            verifyToken(token);
+        }catch (AppException e ){
+            isValid = false;
+        }
         return IntrospectResponse.builder()
-                .valid(verified && expityTime.after(new Date()) )
+                .valid(isValid)
                 .build();
     }
 
@@ -76,6 +79,40 @@ public class AuthenticationService {
                 .build();
     }
 
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepo.save(invalidatedToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expityTime.after(new Date())))
+            throw new AppException(ErrorCode.AUTHENTICATION_FAILED);
+
+
+        if (invalidatedTokenRepo.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.AUTHENTICATION_FAILED);
+
+        return  signedJWT;
+    }
+
+
     String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -86,8 +123,10 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()//het han sau 1 gio
                 ))// xac dinh thoi han
+                .jwtID(UUID.randomUUID().toString()) //logout
                 .claim("scope", buildScope(user))
                 .build();
+
         //sau khi cau hinh xong thi payload
         Payload payLoad = new Payload(jwtClaimSet.toJSONObject());
 

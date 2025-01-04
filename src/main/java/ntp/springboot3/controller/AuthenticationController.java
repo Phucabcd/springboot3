@@ -7,8 +7,10 @@ import lombok.experimental.FieldDefaults;
 import ntp.springboot3.dto.request.ApiResponse;
 import ntp.springboot3.dto.request.AuthenticationRequest;
 import ntp.springboot3.dto.request.IntrospectRequest;
+import ntp.springboot3.dto.request.LogoutRequest;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
 import ntp.springboot3.dto.request.response.IntrospectResponse;
+import ntp.springboot3.entity.InvalidatedToken;
 import ntp.springboot3.service.AuthenticationService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +40,13 @@ public class AuthenticationController {
         var result = authenticationService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder()
                 .result(result)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder()
                 .build();
     }
 }

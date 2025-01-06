@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import ntp.springboot3.dto.request.AuthenticationRequest;
 import ntp.springboot3.dto.request.IntrospectRequest;
 import ntp.springboot3.dto.request.LogoutRequest;
+import ntp.springboot3.dto.request.RefreshRequest;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
 import ntp.springboot3.dto.request.response.IntrospectResponse;
 import ntp.springboot3.entity.InvalidatedToken;
@@ -31,6 +32,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -91,6 +93,34 @@ public class AuthenticationService {
                 .build();
 
         invalidatedTokenRepo.save(invalidatedToken);
+    }
+
+    public AuthenticationResponse refeshToken(RefreshRequest request) throws ParseException, JOSEException {
+        //kiem tra hieu luc token
+         var signedJWT = verifyToken(request.getToken());
+
+         var jit = signedJWT.getJWTClaimsSet().getJWTID();
+         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepo.save(invalidatedToken);
+
+        var username = signedJWT.getJWTClaimsSet().getSubject();
+
+        var user = userRepo.findByUsername(username).orElseThrow(
+                () -> new AppException(ErrorCode.AUTHENTICATION)
+        );
+
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
     }
 
     private SignedJWT verifyToken(String token) throws JOSEException, ParseException {

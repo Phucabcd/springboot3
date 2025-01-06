@@ -4,10 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ntp.springboot3.dto.request.ApiResponse;
-import ntp.springboot3.dto.request.AuthenticationRequest;
-import ntp.springboot3.dto.request.IntrospectRequest;
-import ntp.springboot3.dto.request.LogoutRequest;
+import ntp.springboot3.dto.request.*;
 import ntp.springboot3.dto.request.response.AuthenticationResponse;
 import ntp.springboot3.dto.request.response.IntrospectResponse;
 import ntp.springboot3.entity.InvalidatedToken;
@@ -47,6 +44,15 @@ public class AuthenticationController {
     ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request)
+            throws ParseException, JOSEException {
+        var result = authenticationService.refeshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .result(result)
                 .build();
     }
 }

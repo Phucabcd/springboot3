@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=identity_service;encrypt=true;trustServerCertificate=true
     username: sa
-    password: phuc819615
+    password: #password
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
